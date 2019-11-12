@@ -5,14 +5,23 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	ifstream in ("P00533.fasta.psq", ios::binary);
-	ofstream out ("out.txt");
+	ifstream in (argv[1], ios::binary);
+	ofstream out ("test.txt");
 	if( in.is_open() )
 	{
+		int start= 579;
+		int index=0;
 		int8_t x;
-		while( in.read((char *) (&x), sizeof(x) )){
-			cout << (int) x << endl;
+		in.seekg(start*sizeof(x));
+		while( in.read((char *) (&x), sizeof(x) ) && index <2){
+			//cout << (int) x << endl;
 			out << (int) x << endl;
+			if ((int) x==0){
+				//cout << endl;
+				cout << index << endl;
+				out << endl;
+				index++;
+			}
 		}
 		in.close();
 		out.close();
