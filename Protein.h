@@ -4,16 +4,22 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
+
 
 using namespace std;
 
 class Protein {
 	private:
 	string m_proteinDescription;
-	//type? m_proteinSequence;
+	string m_proteinSequence;
+	std::vector<int> m_vectorSequence;
+	
 	public:
 	Protein();
 	string getProteinDescription();
-	//type? getProteinSequence();
+	string getProteinSequence();
+	void convertToValue();
+	void printVectorSequence();
 };
 #endif
