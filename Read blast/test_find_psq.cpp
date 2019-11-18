@@ -9,12 +9,12 @@ int main(int argc, char *argv[])
 	ofstream out ("test.txt");
 	if( in.is_open() )
 	{
-		int start= 579;
+		int start= 202319489;
 		int index=0;
 		int8_t x;
 		in.seekg(start*sizeof(x));
 		while( in.read((char *) (&x), sizeof(x) ) && index <2){
-			//cout << (int) x << endl;
+			cout << (int) x << endl;
 			out << (int) x << endl;
 			if ((int) x==0){
 				//cout << endl;

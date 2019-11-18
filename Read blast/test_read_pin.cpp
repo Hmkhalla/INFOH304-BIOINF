@@ -14,9 +14,7 @@ int main(int argc, char *argv[])
 		int64_t res_c;
 		int32_t max_seq;
 		uint32_t title_length;
-		int32_t h_o_table;
-		int32_t s_o_table;
-		int32_t a_o_table;
+		
 		in.read((char *) (&Version), sizeof(Version) );Version=__bswap_32(Version);
 		in.read((char *) (&db_type), sizeof(db_type) );db_type=__bswap_32(db_type);
 		in.read((char *) (&title_length), sizeof(title_length) );title_length = __bswap_32(title_length);

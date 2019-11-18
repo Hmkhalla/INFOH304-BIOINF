@@ -9,11 +9,56 @@ int main(int argc, char *argv[])
 	//ofstream out ("out.txt");
 	if( in.is_open() )
 	{	
-		int index=0;
-		int8_t x;
-		while( in.read((char *) (&x), sizeof(x) )){
-			//cout << (int) x << endl;
-			cout << std::hex << (int) x << endl;
+		int nbStrRead = 0;
+		int nbIntRead = 0;
+		int length=0;
+		bool readingInt =false;
+		bool readingLen =false;
+		bool readingStr =false;
+		uint8_t byte;
+		while( in.read((char *) (&byte), sizeof(byte) )){
+			cout << std::hex << (int) byte << endl;
+			if ( ! readingInt && ! readingLen && !readingStr){
+				switch(byte) {
+				  case 0x1a:
+					// String
+					readingStr = true;
+					readingLen = true;
+					cout << "str detected" << endl;
+					break;
+				  case 0x02:
+					// int
+					readingInt = true;
+					readingLen = true;
+					cout << "int detected" << endl;
+					break;
+				}
+			}
+			else if (readingLen){
+				
+				if (readingStr){
+					if (byte & (1<<7)){
+						cout << "Long lentgh - Str" << endl;
+						readingStr = false;
+						readingLen = false;
+					}else{
+						char title[(int) byte +1];
+						for (int i=0; i < (int) byte; i++){
+							in.read((char *) &(title[i]), sizeof(byte));
+						}
+						title[(int) byte] = 0;
+						readingStr = false;
+						readingLen = false;
+						cout << title << endl;
+						cout << "end str" <<endl;
+					}
+				}else if (readingInt){
+					cout << "read int" << endl;
+					readingInt = false;
+					readingLen = false;
+				}
+			}
+			
 		}
 		cout << endl;
 		in.close();
