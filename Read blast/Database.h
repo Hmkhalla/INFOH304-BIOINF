@@ -4,6 +4,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
+#include "Protein.h"
 
 using namespace std;
 
@@ -16,9 +18,11 @@ class Database {
 	uint32_t nb_seq;
 	uint32_t max_seq;
 	uint64_t res_count;
-	uint32_t * seq_table;
-	uint32_t * head_table;
+	uint32_t * Index_seq_table;
+	uint32_t * Index_head_table;
+	
 	public:
+	vector <Protein> prot_table;
 	Database(char* pinFile);
 	~Database();
 	void printDbDescription() const;
@@ -26,8 +30,7 @@ class Database {
 	const uint32_t* getHeadTable() const;
 	uint32_t getIndexSeq(int index) const;
 	uint32_t getIndexHead(int index) const;
-	uint8_t* find_seq(int index) const;
-	string find_header(int index) const;
-	
+	vector<uint8_t> find_seq(int index, ifstream &in) const;
+	string find_header(int start, int end, ifstream &in) const;
 };
 #endif
