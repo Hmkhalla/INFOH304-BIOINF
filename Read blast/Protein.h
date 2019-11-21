@@ -15,12 +15,13 @@ class Protein {
 	std::vector<uint8_t> m_vectorSequence;
 	
 	public:
-	Protein();
+	Protein(char* fasta);
 	~Protein();
 	Protein(string m_proteinDescription, vector<uint8_t> m_vectorSequence);
 	string getProteinDescription();
 	string getProteinSequence();
 	void convertToValue();
 	void printVectorSequence();
+	vector<uint8_t> getVectorSequence();
 };
 #endif
