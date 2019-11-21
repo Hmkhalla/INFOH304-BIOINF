@@ -6,16 +6,16 @@
 #include <string>
 #include <vector>
 
-
 using namespace std;
 
-class Protein {
-	private:
+class Protein
+{
+private:
 	string m_proteinDescription;
 	string m_proteinSequence;
 	std::vector<int> m_vectorSequence;
-	
-	public:
+
+public:
 	Protein();
 	string getProteinDescription();
 	string getProteinSequence();

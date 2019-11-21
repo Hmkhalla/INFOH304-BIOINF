@@ -4,21 +4,25 @@
 #include "Protein.h"
 #include <vector>
 
-
-Protein:: Protein() {
+Protein::Protein()
+{
 }
-Protein:: Protein(string description, vector<uint8_t> sequence) {
+Protein::Protein(string description, vector<uint8_t> sequence)
+{
 	m_proteinDescription = description;
 	m_vectorSequence = sequence;
 }
 
-Protein::~Protein(){
+Protein::~Protein()
+{
 	m_vectorSequence.clear();
 }
 
-string Protein::getProteinDescription() {   
-    return m_proteinDescription;}
-    
+string Protein::getProteinDescription()
+{
+	return m_proteinDescription;
+}
+
 /*
 void Protein::convertToValue(){
 	int length=m_proteinSequence.length();
@@ -115,12 +119,15 @@ void Protein::convertToValue(){
         } 
     }
 }		 
-	*/	
-		
-void Protein::printVectorSequence() {
-	for (int i = 0; i<m_vectorSequence.size(); i++) {
-		cout << (int)m_vectorSequence[i] <<"-";}
-		cout << endl;
+	*/
+
+void Protein::printVectorSequence()
+{
+	for (int i = 0; i < m_vectorSequence.size(); i++)
+	{
+		cout << (int)m_vectorSequence[i] << "-";
+	}
+	cout << endl;
 }
 /*	
 void Protein::init_seq(vector<uint8_t>& bytes ,int index, ifstream &in) const{
