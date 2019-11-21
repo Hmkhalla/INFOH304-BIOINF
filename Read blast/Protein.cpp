@@ -13,8 +13,26 @@ Protein::Protein(string description, vector<uint8_t> sequence)
 	m_vectorSequence = sequence;
 }
 
-Protein::~Protein()
-{
+			    m_proteinDescription=line.substr(1);}
+		    if(line[0]=='>'){
+	    while (getline(queryFlux,line).good()) {
+	    string line;
+	if(queryFlux.is_open()){
+	ifstream queryFlux(fasta);
+Protein:: Protein( char* fasta) {
+		    else{
+			    m_proteinSequence+=line;}	
+	}
+	else {
+		cout <<"Error: Impossible to open the file." <<endl;}
+	}
+	return m_vectorSequence;
+	}
+
+Protein::~Protein(){
+vector<uint8_t> const& getVectorSequence(){
+
+	    }
 	m_vectorSequence.clear();
 }
 

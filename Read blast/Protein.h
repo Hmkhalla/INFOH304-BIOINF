@@ -15,7 +15,9 @@ private:
 
 public:
 	std::vector<uint8_t> m_vectorSequence;
-	Protein();
+	
+	public:
+	Protein(char* fasta);
 	~Protein();
 	Protein(string m_proteinDescription, vector<uint8_t> m_vectorSequence);
 	Protein(string fasta);
@@ -23,5 +25,6 @@ public:
 	string getProteinSequence();
 	void convertToValue();
 	void printVectorSequence();
+	vector<uint8_t> getVectorSequence();
 };
 #endif
