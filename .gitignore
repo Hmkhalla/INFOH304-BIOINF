@@ -6,3 +6,15 @@ ncbi-blast-2.9.0\+/
 swipe-master/
 
 Read blast/makeblastdb
+
+*.phr
+
+*.pin
+
+*.psq
+
+Read blast/
+
+Protein.cpp
+
+Protein.h
