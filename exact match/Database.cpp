@@ -172,102 +172,177 @@ void Database::exactMatch(char * queryPath){
 	}
 }
 
-void convertToValue(vector<uint8_t> & sequence, ifstream &queryFlux){
+uint8_t Database::scoring(vector<uint8_t> *seq1, uint32_t nb1, vector<uint8_t> *seq2, uint32_t nb2)
+{
+	uint8_t gap = -1;
+	uint8_t open_gp = -11;
+	//vector<int8_t> *v1 = new vector<int8_t>(nb1 + 1, 0);
+	vector<uint8_t> *v2 = new vector<uint8_t>(nb2 + 1, 0);
+	vector<uint8_t> *curV = new vector<uint8_t>(nb2 + 1, 0);
+	uint8_t max_scoring = 0;
+	uint8_t Hi_1j_1;
+	uint8_t Hij_1;
+	uint8_t Hi_1j;
+	uint8_t Hij; //plutot les valeurs partantes de ces "cases"
+	for (int i = 1; i <= nb1; i++)
+	{
+		for (int j = 1; i <= nb2 + 1; i++)
+		{
+			curV->at(j) = max(max(curV->at(j - 1) + open_gp, v2->at(i - 1) + open_gp), max(v2->at(j - 1) + ((seq1->at(i) < seq2->at(i)) ? 1 : 2), 0));
+			if (curV->at(j) > max_scoring)
+			{
+				max_scoring = curV->at(i);
+			}
+		}
+		curV, v2 = v2, curV;
+	}
+	delete curV;
+	delete v2;
+	return max_scoring;
+}
+
+void Database::notExactMatch(char *queryPath)
+{
+	vector<uint8_t> query_seq, temp_seq;
+	vector<uint8_t> scores;
+	uint8_t score;
+	vector<uint8_t, uint8_t> classement;
+	classement.resize(50);
+	ifstream queryFlux(queryPath, ios::binary);
+	convertToValue(query_seq, queryFlux);
+	queryFlux.close();
+	scores.resize(nb_seq);
+	for (int i = 0; i < nb_seq; i++)
+	{
+		find_seq(temp_seq, i);
+		score = scoring(&query_seq, nb_seq, &temp_seq, getIndexSeq(i + 1) - getIndexSeq(i) - 1);
+		scores.push_back(score);
+	}
+	uint8_t minMax;
+	uint8_t minMaxIndex;
+	uint8_t curMax = 0;
+	uint8_t curMaxIndex;
+	vector<int, int> bestMatches;
+	bestMatches.resize(50);
+	for (int i = 0; i < 50; i++)
+	{
+		for (int j = 0; j < nb_seq; j++)
+		{
+			if (scores.at(j) > curMax && (scores.at(j) < minMax || (scores.at(j) = minMax && j > minMaxIndex)))
+			{
+				curMax = scores.at(j);
+				curMaxIndex = j;
+			}
+		}
+		minMax = curMax;
+		minMaxIndex = curMaxIndex;
+		bestMatches.at(i) = ((int)curMax, (int)curMaxIndex);
+	} // ===> On créer une liste avec les scores de protéines et et leur index dans les offset
+}
+
+void convertToValue(vector<uint8_t> &sequence, ifstream &queryFlux)
+{
 	string buffer;
-	if(queryFlux.is_open()){
-	    string line;
-	    while (getline(queryFlux,line).good()) {
-		    if(line[0]!='>'){
-			    buffer+=line;}	
-	    }
-	    sequence.reserve(buffer.length()+1);
-	    for( int i=0; i<buffer.length(); i++) {
-			switch (buffer[i]) {
-				case '-':
-					sequence.push_back(0);
-					break;
-				case 'A':
-					sequence.push_back(1);
-					break;
-				case 'B':
-					sequence.push_back(2);
-					break;
-				case 'C':
-					sequence.push_back(3); 
-					break;
-				case 'D':
-					sequence.push_back(4);
-					break;
-				case 'E':
-					sequence.push_back(5);
-					break;
-				case 'F':
-					sequence.push_back(6);
-					break;
-				case 'G':
-					sequence.push_back(7);
-					break;
-				case 'H':
-					sequence.push_back(8);
-					break;
-				case 'I':
-					sequence.push_back(9);
-					break;
-				case 'J':
-					sequence.push_back(27);
-					break;
-				case 'K':
-					sequence.push_back(10);
-					break;
-				case 'L':
-					sequence.push_back(11);
-					break;
-				case 'M':
-					sequence.push_back(12);
-					break;
-				case 'N':
-					sequence.push_back(13);
-					break;
-				case 'O':
-					sequence.push_back(26);
-					break;
-				case 'P':
-					sequence.push_back(14);
-					break;
-				case 'Q':
-					sequence.push_back(15);
-					break;
-				case 'R':
-					sequence.push_back(16);
-					break;
-				case 'S':
-					sequence.push_back(17);
-					break;
-				case 'T':
-					sequence.push_back(18);
-					break;
-				case 'U':
-					sequence.push_back(24);
-					break;
-				case 'V':
-					sequence.push_back(19);
-					break;
-				case 'W':
-					sequence.push_back(20);
-					break;
-				case 'X':
-					sequence.push_back(21);
-					break;
-				case 'Y':
-					sequence.push_back(22);
-					break;
-				case 'Z':
-					sequence.push_back(23);
-					break;
-				case '*':
-					sequence.push_back(25);
-					break;
-			} 
+	if (queryFlux.is_open())
+	{
+		string line;
+		while (getline(queryFlux, line).good())
+		{
+			if (line[0] != '>')
+			{
+				buffer += line;
+			}
+		}
+		sequence.reserve(buffer.length() + 1);
+		for (int i = 0; i < buffer.length(); i++)
+		{
+			switch (buffer[i])
+			{
+			case '-':
+				sequence.push_back(0);
+				break;
+			case 'A':
+				sequence.push_back(1);
+				break;
+			case 'B':
+				sequence.push_back(2);
+				break;
+			case 'C':
+				sequence.push_back(3);
+				break;
+			case 'D':
+				sequence.push_back(4);
+				break;
+			case 'E':
+				sequence.push_back(5);
+				break;
+			case 'F':
+				sequence.push_back(6);
+				break;
+			case 'G':
+				sequence.push_back(7);
+				break;
+			case 'H':
+				sequence.push_back(8);
+				break;
+			case 'I':
+				sequence.push_back(9);
+				break;
+			case 'J':
+				sequence.push_back(27);
+				break;
+			case 'K':
+				sequence.push_back(10);
+				break;
+			case 'L':
+				sequence.push_back(11);
+				break;
+			case 'M':
+				sequence.push_back(12);
+				break;
+			case 'N':
+				sequence.push_back(13);
+				break;
+			case 'O':
+				sequence.push_back(26);
+				break;
+			case 'P':
+				sequence.push_back(14);
+				break;
+			case 'Q':
+				sequence.push_back(15);
+				break;
+			case 'R':
+				sequence.push_back(16);
+				break;
+			case 'S':
+				sequence.push_back(17);
+				break;
+			case 'T':
+				sequence.push_back(18);
+				break;
+			case 'U':
+				sequence.push_back(24);
+				break;
+			case 'V':
+				sequence.push_back(19);
+				break;
+			case 'W':
+				sequence.push_back(20);
+				break;
+			case 'X':
+				sequence.push_back(21);
+				break;
+			case 'Y':
+				sequence.push_back(22);
+				break;
+			case 'Z':
+				sequence.push_back(23);
+				break;
+			case '*':
+				sequence.push_back(25);
+				break;
+			}
 		}
 	}
 }
