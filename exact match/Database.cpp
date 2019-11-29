@@ -171,7 +171,7 @@ void Database::exactMatch(char * queryPath){
 		temp_seq.clear();
 	}
 }
-
+/*
 uint8_t Database::scoring(vector<uint8_t> *seq1, uint32_t nb1, vector<uint8_t> *seq2, uint32_t nb2)
 {
 	uint8_t gap = -1;
@@ -238,7 +238,7 @@ void Database::notExactMatch(char *queryPath)
 		minMaxIndex = curMaxIndex;
 		bestMatches.at(i) = ((int)curMax, (int)curMaxIndex);
 	} // ===> On créer une liste avec les scores de protéines et et leur index dans les offset
-}
+} */
 
 void convertToValue(vector<uint8_t> &sequence, ifstream &queryFlux)
 {
