@@ -5,13 +5,21 @@
 #include <fstream>
 #include <string>
 #include <vector>
+<<<<<<< Updated upstream
 //#include <algorithm>
+=======
+#include <algorithm>
+#include <map>
+>>>>>>> Stashed changes
 using namespace std;
 
-class Database {
+class Database
+{
 	ifstream phr;
 	ifstream pin;
 	ifstream psq;
+	map<char, uint8_t> conversion;
+	int8_t blosumMatrix[28][28];
 	uint32_t version;
 	uint32_t db_type;
 	uint32_t nb_seq;
@@ -20,7 +28,13 @@ class Database {
 	char *title;
 	char *time;
 	uint32_t *Index_seq_table;
+<<<<<<< Updated upstream
 	uint32_t *Index_head_table; 
+=======
+	uint32_t *Index_head_table;
+	uint16_t max(uint16_t n1, uint16_t n2);
+	void getBlosumMatrix(string blosumPath);
+>>>>>>> Stashed changes
 
 public:
 	Database(string path);
@@ -31,9 +45,14 @@ public:
 	void find_seq(vector<uint8_t> &bytes, int index);
 	void find_header(string &res, int index);
 	void exactMatch(char *queryPath);
+<<<<<<< Updated upstream
 	//uint8_t scoring(vector<uint8_t> *seq1, uint32_t nb1, vector<uint8_t> *seq2, uint32_t nb2);
 	//void notExactMatch(char *queryPath); 
+=======
+	int scoring(vector<uint8_t> *seq1, uint32_t nb1, vector<uint8_t> *seq2, uint32_t nb2);
+	void notExactMatch(char *queryPath);
+	void convertToValue(vector<uint8_t> &sequence, ifstream &in);
+>>>>>>> Stashed changes
 };
 
-void convertToValue(vector<uint8_t> &sequence, ifstream &in);
 #endif
