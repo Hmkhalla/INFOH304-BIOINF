@@ -265,15 +265,10 @@ void Database::getBlosumMatrix(string pathBlosum)
 
 int Database::scoring(uint8_t *seq1, uint32_t nb1, uint8_t *seq2, uint32_t nb2)
 {
-    /*
-	Here the curV[j][0] = Hij and v2[j] = Hi-1,j
-	Here the curV[j][1] = Fij
-	We need only two row to have all the information we need
-	*/
+
     uint16_t ext_gap = 1;
     uint16_t open_gp = 11;
     uint16_t sum = 12;
-    //vector<int8_t> *v1 = new vector<int8_t>(nb1 + 1, 0);
     uint16_t *curV = new uint16_t[nb2 + 1];
     uint16_t *FijVector = new uint16_t[nb2 + 1];
     for (int i = 0; i < nb2 + 1; i++)
@@ -381,14 +376,14 @@ void Database::notExactMatch(char *queryPath)
         temp_seq = find_seq(i, nb2);
 
         score = scoring(query_seq, nb1, temp_seq, nb2);
-        if (score > mx)
+        if (score > mx && i != 2958)
         {
             mx = score;
             maxIndex = i;
         }
         //scores.push_back(score); //min: 32 2968
     }
-    cout << "Max index :" << maxIndex << endl;
+    cout << "Max index :" << maxIndex << " Max score : " << mx << endl;
     /*
 	uint8_t minMax;
 	uint8_t minMaxIndex;
