@@ -229,13 +229,8 @@ void Database::exactMatch(char *queryPath)
 		temp_seq.clear();
 	}
 }
-<<<<<<< Updated upstream
-/*
-uint8_t Database::scoring(vector<uint8_t> *seq1, uint32_t nb1, vector<uint8_t> *seq2, uint32_t nb2)
-=======
 
 void Database::getBlosumMatrix(string pathBlosum)
->>>>>>> Stashed changes
 {
 	ifstream blosumFile;
 	blosumFile.open(pathBlosum);
@@ -400,37 +395,9 @@ void Database::notExactMatch(char *queryPath)
 		//scores.push_back(score); //min: 32
 	}
 	cout << "Max index :" << maxIndex << endl;
-	/*
-	uint8_t minMax;
-	uint8_t minMaxIndex;
-	uint8_t curMax = 0;
-	uint8_t curMaxIndex;
-	vector<int, int> bestMatches;
-	bestMatches.resize(50);
-	for (int i = 0; i < 50; i++)
-	{
-		for (int j = 0; j < nb_seq; j++)
-		{
-			if (scores.at(j) > curMax && (scores.at(j) < minMax || (scores.at(j) = minMax && j > minMaxIndex)))
-			{
-				curMax = scores.at(j);
-				curMaxIndex = j;
-			}
-		}
-		minMax = curMax;
-		minMaxIndex = curMaxIndex;
-		bestMatches.at(i) = ((int)curMax, (int)curMaxIndex);
-<<<<<<< Updated upstream
-	} // ===> On créer une liste avec les scores de protéines et et leur index dans les offset
-} */
-=======
-		string header;
-		find_header(header, (int)curMaxIndex);
-		printf("%s, score %i\n", header, (int)curMax);
-	}
+
 	// ===> On créer une liste avec les scores de protéines et et leur index dans les offset*/
 }
->>>>>>> Stashed changes
 
 void Database::convertToValue(vector<uint8_t> &sequence, ifstream &queryFlux)
 {

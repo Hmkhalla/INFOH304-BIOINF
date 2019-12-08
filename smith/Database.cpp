@@ -255,29 +255,12 @@ void Database::getBlosumMatrix(string pathBlosum)
             }
             continue;
         }
-        cout << line << endl;
         for (int i = 3; i < 73; i += 3)
         {
             blosumMatrix[conversionCharChar[(int)i / 3]][conversion[line.at(0)]] = ((int)line.at(i) - 48) * ((line.at(i - 1) == '-') ? -1 : 1);
         }
     }
-
-    for (uint8_t i = 0; i < conversion.size(); i++)
-    {
-        for (uint8_t j = 0; j < conversion.size(); j++)
-        {
-            if (blosumMatrix[i][j] >= 0)
-                cout << " ";
-            cout << blosumMatrix[i][j] << " ";
-        }
-        cout << endl;
-    }
     blosumFile.close();
-}
-
-uint16_t Database::max(uint16_t n1, uint16_t n2)
-{
-    return (n1 > n2) ? n1 : n2;
 }
 
 int Database::scoring(uint8_t *seq1, uint32_t nb1, uint8_t *seq2, uint32_t nb2)
@@ -299,66 +282,72 @@ int Database::scoring(uint8_t *seq1, uint32_t nb1, uint8_t *seq2, uint32_t nb2)
         curV[i] = 0;
     }
 
-    uint16_t Fij;
+    uint16_t Fij = 0;
     uint16_t Eij = 0;
-    uint16_t Hij;
+    int16_t Hij;
     int16_t max_scoring = 0;
     uint16_t value = 0;
     //printf("le value de depart : %u \n", value);
-    int16_t scoreAB;
+    int16_t scoreAB = 0;
     //printf( "nb1 = %d et nb2 = %d  et v2 size %d et size seq1 : %d \n", nb1, nb2, v2->size(), seq1->size());
 
     for (unsigned int i = 1; i <= nb1; i++)
     {
         for (unsigned int j = 1; j <= nb2; j++)
         {
-            /*
-            if (value > Eij + open_gp)
+
+            if (value > Eij + open_gp && value >= sum)
             {
                 Eij = value;
                 Eij -= sum;
             }
-            else if (Eij > ext_gap)
+            else if (Eij >= ext_gap)
             {
                 Eij -= ext_gap;
             }
             else
                 Eij = 0;
 
-            if (curV[j] > Fij + open_gp)
+            if (curV[j] > FijVector[j] + open_gp && curV[j] >= sum)
             {
                 Fij = curV[j];
                 Fij -= sum;
             }
-            else if (Fij > ext_gap)
+            else if (FijVector[j] >= ext_gap)
             {
-                Fij -= ext_gap;
+                Fij = FijVector[j] - ext_gap;
             }
             else
                 Fij = 0;
-			*/
+            /*
             Eij = (Eij > ext_gap) ? Eij - ext_gap : 0;
             Eij = ((value > Eij + sum) ? value - sum : Eij);
             Fij = (FijVector[j] > ext_gap) ? FijVector[j] - ext_gap : 0;
             Fij = ((curV[j] > Fij + sum) ? curV[j] - sum : Fij);
+			*/
             FijVector[j] = Fij;
-            scoreAB = blosumMatrix[seq1[i - 1]][seq2[j - 1]];
+            //scoreAB = blosumMatrix[seq1[i - 1]][seq2[j - 1]];
 
-            Hij = (curV[j - 1] > -scoreAB) ? curV[j - 1] + scoreAB : 0;
+            Hij = curV[j - 1];
+            Hij += blosumMatrix[seq1[i - 1]][seq2[j - 1]];
 
             curV[j - 1] = value;
-            value = max(max(Hij, Fij), Eij);
-            //tempHij = curV[j];
-            FijVector[j] = Fij;
+            //value = max(max(Hij, Eij), Fij);
+            if (Hij > Eij)
+                value = Hij;
+            else
+                value = Eij;
+            if (Fij > value)
+                value = Fij;
 
             if (value > max_scoring)
             {
                 max_scoring = value;
             }
-            printf("%6u", value);
+            //printf("%6u", value);
         }
         //*curV = vector<uint16_t>(nb2 + 1, 0);
-        printf("\n");
+        //printf("\n");
         value = 0;
         Eij = 0;
     }
@@ -380,7 +369,9 @@ void Database::notExactMatch(char *queryPath)
     scores.resize(nb_seq);
     int mx = 0;
     int maxIndex = 0;
-    for (int i = 18; i < 7000; i += 20)
+    for (int i = 0; i < nb_seq; i++)
+    //for (int i = 2958; i < 2959; i ++)
+
     {
         if (i % 1000 == 18)
         {
