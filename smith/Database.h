@@ -11,9 +11,8 @@ using namespace std;
 
 class Database
 {
-    ifstream phr;
-    ifstream pin;
-    ifstream psq;
+    uint8_t * phr;
+    uint8_t * psq;
     map<char, uint8_t> conversion;
     int8_t blosumMatrix[28][28];
     uint32_t version;
@@ -25,13 +24,14 @@ class Database
     char *time;
     uint32_t *Index_seq_table;
     uint32_t *Index_head_table;
-    uint16_t max(uint16_t n1, uint16_t n2);
+    int16_t Max(int16_t n1, int16_t n2, int16_t n3, int16_t n4);
     void getBlosumMatrix(string blosumPath);
 
 public:
     Database(string path);
     ~Database();
     void printDbDescription() const;
+    void readPin(string  path);
     uint32_t getIndexSeq(int index) const;
     uint32_t getIndexHead(int index) const;
     uint8_t *find_seq(int index, int &nb);

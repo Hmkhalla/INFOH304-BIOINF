@@ -1,5 +1,6 @@
 #define NOMINMAX
 #include "Database.h"
+#include <algorithm>
 using namespace std;
 
 Database::Database(string path)
@@ -9,13 +10,38 @@ Database::Database(string path)
         {'-', 0}, {'A', 1}, {'B', 2}, {'C', 3}, {'D', 4}, {'E', 5}, {'F', 6}, {'G', 7}, {'H', 8}, {'I', 9}, {'J', 27}, {'K', 10}, {'L', 11}, {'M', 12}, {'N', 13}, {'O', 26}, {'P', 14}, {'Q', 15}, {'R', 16}, {'S', 17}, {'T', 18}, {'U', 24}, {'V', 19}, {'W', 20}, {'X', 21}, {'Y', 22}, {'Z', 23}, {'*', 25} //etc
     };
 
-    pin = ifstream(path + ".pin", ios::binary);
-    phr = ifstream(path + ".phr", ios::binary);
-    psq = ifstream(path + ".psq", ios::binary);
-    getBlosumMatrix("BLOSUM62");
-    if (pin.is_open())
+    readPin(path);
+	ifstream psq_stream = ifstream(path + ".psq", ios::binary);
+	ifstream phr_stream = ifstream(path + ".phr", ios::binary);
+	getBlosumMatrix("BLOSUM62");
+	if (psq_stream.is_open() && phr_stream.is_open())
     {
+		psq = new uint8_t[Index_seq_table[nb_seq]];
+		phr = new uint8_t[Index_head_table[nb_seq]];
+		psq_stream.read((char *)&psq[0], sizeof(uint8_t) * (Index_seq_table[nb_seq]));
+		phr_stream.read((char *)&phr[0], sizeof(uint8_t) * (Index_head_table[nb_seq]));
+		psq_stream.close();
+		phr_stream.close();
+	}else{
+		cerr << "Impossible d'ouvrir le fichier psq ou phr" << endl;
+		exit(EXIT_FAILURE);
+	}
+}
 
+Database::~Database()
+{
+    delete title;
+    delete time;
+	delete[] phr;
+    delete[] psq;
+    delete[] Index_seq_table;
+    delete[] Index_head_table;
+}
+
+void Database::readPin(string path){
+	ifstream pin = ifstream(path + ".pin", ios::binary);
+	if (pin.is_open())
+    {
         uint32_t length;
 
         pin.read((char *)(&version), sizeof(version));
@@ -54,21 +80,21 @@ Database::Database(string path)
 
         pin.close();
     }
-    else
-        cerr << "Impossible d'ouvrir le fichier pin" << endl;
+    else{
+		cerr << "Impossible d'ouvrir le fichier pin" << endl;
+		exit(EXIT_FAILURE);
+   }
 }
 
-Database::~Database()
-{
-    pin.close();
-    phr.close();
-    psq.close();
-    delete title;
-    delete time;
-    delete[] Index_seq_table;
-    delete[] Index_head_table;
+int16_t Database::Max(int16_t n1, int16_t n2, int16_t n3, int16_t n4){
+	int16_t res = 0;
+	if(res < n1) res = n1;
+	if(res < n2) res = n2;
+	if(res < n3) res = n3;
+	if(res < n4) res = n4;
+	return res;
 }
-
+	
 void Database::printDbDescription() const
 {
     cout << "Version :" << version << endl;
@@ -114,20 +140,10 @@ uint8_t *Database::find_seq(int index, int &nb)
 {
 
     nb = ((int)getIndexSeq(index + 1) - (int)getIndexSeq(index)) - 1;
-    uint8_t *bytes = new uint8_t[nb];
-    if (psq.is_open())
-    {
-        psq.seekg((int)getIndexSeq(index) * sizeof(uint8_t), ios::beg);
-        psq.read((char *)&(bytes[0]), sizeof(uint8_t) * nb);
-        return bytes;
-    }
-    else
-    {
-        cerr << "Impossible d'ouvrir le fichier psq" << endl;
-    }
+    return psq + (int)getIndexSeq(index);
 }
 
-void Database::find_header(string &res, int index)
+/*void Database::find_header(string &res, int index)
 {
     if (phr.is_open())
     {
@@ -205,31 +221,34 @@ void Database::find_header(string &res, int index)
     }
     else
         cerr << "Impossible d'ouvrir le fichier" << endl;
-}
-void Database::exactMatch(char *queryPath)
-{
-    /*
-    vector<uint8_t> query_seq, temp_seq;
-    ifstream queryFlux(queryPath, ios::binary);
-    convertToValue(query_seq, queryFlux);
-    queryFlux.close();
+}*/
 
+void Database::exactMatch(char *queryPath)
+{/*
+    uint8_t *query_seq, temp_seq;
+    int nb1, nb2;
+    ifstream queryFlux(queryPath, ios::binary);
+    query_seq = convertToValue(queryFlux, nb1);
+    queryFlux.close();
     for (int i = 0; i < nb_seq; i++)
     {
-        if (getIndexSeq(i + 1) - getIndexSeq(i) - 1 == query_seq.size())
+        //if (getIndexSeq(i + 1) - getIndexSeq(i) - 1 == query_seq.size())
         {
-            find_seq(temp_seq, i);
-            if (query_seq == temp_seq)
+            temp_seq= find_seq(i, nb2);
+            for (int i = 0; i <nb1 && ; i ++)
+            if (isMatch(query_seq, temp_seq))
             {
-                string header;
-                find_header(header, i);
-                cout << "index : " << i << endl;
-                cout << "answer here: " << header << endl;
+                //string header;
+                //find_header(header, i);
+                cout << "answer here index : " << i << endl;
+                //cout << "answer here: " << header << endl;
             }
         }
         temp_seq.clear();
-}*/
+	}
+	* */
 }
+
 
 void Database::getBlosumMatrix(string pathBlosum)
 {
@@ -257,105 +276,54 @@ void Database::getBlosumMatrix(string pathBlosum)
         }
         for (int i = 3; i < 73; i += 3)
         {
-            blosumMatrix[conversionCharChar[(int)i / 3]][conversion[line.at(0)]] = ((int)line.at(i) - 48) * ((line.at(i - 1) == '-') ? -1 : 1);
+			if (line.at(i - 1)== ' ' or line.at(i - 1) == '-') blosumMatrix[conversionCharChar[(int)i / 3]][conversion[line.at(0)]] = ((int)line.at(i) - 48) * ((line.at(i - 1) == '-') ? -1 : 1);
+			else blosumMatrix[conversionCharChar[(int)i / 3]][conversion[line.at(0)]] = 11;
+
         }
     }
     blosumFile.close();
 }
 
-int Database::scoring(uint8_t *seq1, uint32_t nb1, uint8_t *seq2, uint32_t nb2)
+int Database::scoring(uint8_t *query, uint32_t queryLen, uint8_t *tmp, uint32_t tmpLen)
 {
 
-    uint16_t ext_gap = 1;
-    uint16_t open_gp = 11;
-    uint16_t sum = 12;
-    uint16_t *curV = new uint16_t[nb2 + 1];
-    uint16_t *FijVector = new uint16_t[nb2 + 1];
-    for (int i = 0; i < nb2 + 1; i++)
-    {
-        FijVector[i] = 0;
-        curV[i] = 0;
-    }
+    int8_t R = 1;
+    int8_t open_gp = 11;
+    int8_t Q = R+open_gp;
+    int8_t blos;
+    int16_t F = 0;
+    int16_t H_top = 0;
+    int16_t H=0;
+    int16_t *H_left = new int16_t[queryLen + 1];
+    int16_t *E_left = new int16_t[queryLen];
+    for (int i = 0; i <=queryLen; i++){
+		H_left[i] = 0;
+		E_left[i]= 0;
+	}
 
-    uint16_t Fij = 0;
-    uint16_t Eij = 0;
-    int16_t Hij;
     int16_t max_scoring = 0;
-    uint16_t value = 0;
-    //printf("le value de depart : %u \n", value);
-    int16_t scoreAB = 0;
-    //printf( "nb1 = %d et nb2 = %d  et v2 size %d et size seq1 : %d \n", nb1, nb2, v2->size(), seq1->size());
-
-    for (unsigned int i = 1; i <= nb1; i++)
+    for (unsigned int j = 1; j <= tmpLen; j++)
     {
-        for (unsigned int j = 1; j <= nb2; j++)
+        for (unsigned int i = 1; i <= queryLen; i++)
         {
-
-            if (value > Eij + open_gp && value >= sum)
-            {
-                Eij = value;
-                Eij -= sum;
-            }
-            else if (Eij >= ext_gap)
-            {
-                Eij -= ext_gap;
-            }
-            else
-                Eij = 0;
-
-            if (curV[j] > FijVector[j] + open_gp && curV[j] >= sum)
-            {
-                Fij = curV[j];
-                Fij -= sum;
-            }
-            else if (FijVector[j] >= ext_gap)
-            {
-                Fij = FijVector[j] - ext_gap;
-            }
-            else
-                Fij = 0;
-            /*
-            Eij = (Eij > ext_gap) ? Eij - ext_gap : 0;
-            Eij = ((value > Eij + sum) ? value - sum : Eij);
-            Fij = (FijVector[j] > ext_gap) ? FijVector[j] - ext_gap : 0;
-            Fij = ((curV[j] > Fij + sum) ? curV[j] - sum : Fij);
-			*/
-            FijVector[j] = Fij;
-            //scoreAB = blosumMatrix[seq1[i - 1]][seq2[j - 1]];
-
-            Hij = curV[j - 1];
-            Hij += blosumMatrix[seq1[i - 1]][seq2[j - 1]];
-
-            curV[j - 1] = value;
-            //value = max(max(Hij, Eij), Fij);
-            if (Hij > Eij)
-                value = Hij;
-            else
-                value = Eij;
-            if (Fij > value)
-                value = Fij;
-
-            if (value > max_scoring)
-            {
-                max_scoring = value;
-            }
-            //printf("%6u", value);
+			E_left[i-1] = std::max (H_left[i]-Q, E_left[i-1]-R);
+			F = std::max (H_top-Q, F-R);
+			blos = blosumMatrix[query[i-1]][tmp[j-1]];
+			H = Max(H_left[i-1]+blos, E_left[i-1], F, 0);
+			H_left[i-1] = H_top; H_top = H;
+			//cout << "(" << i-1 << ", " << j-1 << ") " << "(" << (int )query[i-1] << ", " << (int )tmp[j-1] << ") " << " E : " << E_left[i] << " F : " << F << " Hcurrent : " << H << " Blosum : " << (int) blos <<endl;
+			if (H > max_scoring) max_scoring = H;
         }
-        //*curV = vector<uint16_t>(nb2 + 1, 0);
-        //printf("\n");
-        value = 0;
-        Eij = 0;
+        F=0;H_top=0;H_left[queryLen] = H;
     }
-    //printf("max scoring = %d", max_scoring);
-    delete[] curV;
-    delete[] FijVector;
+    delete[] H_left;
     return max_scoring;
 }
 
 void Database::notExactMatch(char *queryPath)
 {
     uint8_t *query_seq, *temp_seq;
-    vector<uint8_t> scores;
+    vector<int> scores;
     int score;
     ifstream queryFlux(queryPath, ios::binary);
     int nb1, nb2;
@@ -374,15 +342,24 @@ void Database::notExactMatch(char *queryPath)
         }
         //printf("On est à %d/%d \n", i, nb_seq);
         temp_seq = find_seq(i, nb2);
-
         score = scoring(query_seq, nb1, temp_seq, nb2);
-        if (score > mx && i != 2958)
+        if (score > mx)// && i != 2958)
         {
             mx = score;
             maxIndex = i;
         }
-        //scores.push_back(score); //min: 32 2968
+        scores.push_back(score); //min: 32 2968
     }
+    sort(scores.begin(), scores.end(), greater <>());
+    int j = 0;
+    for (const auto &i: scores){
+		if (j == 10) break;
+		cout << "Score : " << (int) i <<endl;
+		j++;
+	}/*
+    for (int i = 0; i < 10; i++)
+		cout << "Score : " << (int) scores[i] << endl;
+		*/
     cout << "Max index :" << maxIndex << " Max score : " << mx << endl;
     /*
 	uint8_t minMax;
@@ -414,17 +391,20 @@ void Database::notExactMatch(char *queryPath)
 uint8_t *Database::convertToValue(ifstream &queryFlux, int &nb)
 {
     string buffer;
-
+	char residue;
     if (queryFlux.is_open())
     {
-        string line;
-        while (getline(queryFlux, line).good())
+        string header;
+        getline(queryFlux, header);
+        while (queryFlux.get(residue))
         {
-            if (line[0] != '>')
+            if (residue != 10 && residue != 13)
             {
-                buffer += line;
+				
+                buffer += residue;
             }
         }
+        cout << endl;
         nb = buffer.length();
         uint8_t *sequence = new uint8_t[nb];
         for (int i = 0; i < buffer.length(); i++)
