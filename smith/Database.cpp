@@ -86,12 +86,12 @@ void Database::readPin(string path){
    }
 }
 
-int16_t Database::Max(int16_t n1, int16_t n2, int16_t n3, int16_t n4){
-	int16_t res = 0;
-	if(res < n1) res = n1;
-	if(res < n2) res = n2;
-	if(res < n3) res = n3;
-	if(res < n4) res = n4;
+int Database::Max(int n1, int n2, int n3, int n4){
+	int res = 0;
+	if(res <= n1) res = n1;
+	if(res <= n2) res = n2;
+	if(res <= n3) res = n3;
+	if(res <= n4) res = n4;
 	return res;
 }
 	
@@ -259,6 +259,11 @@ void Database::getBlosumMatrix(string pathBlosum)
         cout << "Unable to open file" << endl;
         exit(1);
     }
+    for (int i = 0; i<28; i++) {
+		for (int j = 0; j<28; j++) {
+			blosumMatrix[i][j] = 0; 
+		}
+	}
     string line;
     map<int, uint8_t> conversionCharChar;
     bool salut = true;
@@ -284,39 +289,43 @@ void Database::getBlosumMatrix(string pathBlosum)
     blosumFile.close();
 }
 
+
+
 int Database::scoring(uint8_t *query, uint32_t queryLen, uint8_t *tmp, uint32_t tmpLen)
 {
 
-    int8_t R = 1;
-    int8_t open_gp = 11;
-    int8_t Q = R+open_gp;
-    int8_t blos;
-    int16_t F = 0;
-    int16_t H_top = 0;
-    int16_t H=0;
-    int16_t *H_left = new int16_t[queryLen + 1];
-    int16_t *E_left = new int16_t[queryLen];
+    int R = 1;
+    int open_gp = 11;
+    int Q = R+open_gp;
+    int blos;
+    int F = 0;
+    int H_top = 0;
+    int H=0;
+    int *H_left = new int[queryLen + 1];
+    int *E_left = new int[queryLen + 1];
     for (int i = 0; i <=queryLen; i++){
 		H_left[i] = 0;
 		E_left[i]= 0;
 	}
-
-    int16_t max_scoring = 0;
+    int max_scoring = 0;
     for (unsigned int j = 1; j <= tmpLen; j++)
     {
         for (unsigned int i = 1; i <= queryLen; i++)
         {
-			E_left[i-1] = std::max (H_left[i]-Q, E_left[i-1]-R);
+			E_left[i] = std::max (H_left[i]-Q, E_left[i]-R);
 			F = std::max (H_top-Q, F-R);
 			blos = blosumMatrix[query[i-1]][tmp[j-1]];
-			H = Max(H_left[i-1]+blos, E_left[i-1], F, 0);
+			H = Max(H_left[i-1]+blos, E_left[i], F, 0);
 			H_left[i-1] = H_top; H_top = H;
+			//if (i == j)
 			//cout << "(" << i-1 << ", " << j-1 << ") " << "(" << (int )query[i-1] << ", " << (int )tmp[j-1] << ") " << " E : " << E_left[i] << " F : " << F << " Hcurrent : " << H << " Blosum : " << (int) blos <<endl;
 			if (H > max_scoring) max_scoring = H;
         }
         F=0;H_top=0;H_left[queryLen] = H;
     }
     delete[] H_left;
+    delete[] E_left;
+    //cout << "max score in scoring :" << (int) max_scoring << endl;
     return max_scoring;
 }
 
@@ -333,14 +342,11 @@ void Database::notExactMatch(char *queryPath)
     int mx = 0;
     int maxIndex = 0;
     for (int i = 0; i < nb_seq; i++)
-    //for (int i = 2958; i < 2959; i ++)
-
     {
         if (i % 1000 == 18)
         {
             printf("On est à %d/%d \n", i, nb_seq);
         }
-        //printf("On est à %d/%d \n", i, nb_seq);
         temp_seq = find_seq(i, nb2);
         score = scoring(query_seq, nb1, temp_seq, nb2);
         if (score > mx)// && i != 2958)
@@ -352,40 +358,13 @@ void Database::notExactMatch(char *queryPath)
     }
     sort(scores.begin(), scores.end(), greater <>());
     int j = 0;
+    
     for (const auto &i: scores){
 		if (j == 10) break;
 		cout << "Score : " << (int) i <<endl;
 		j++;
-	}/*
-    for (int i = 0; i < 10; i++)
-		cout << "Score : " << (int) scores[i] << endl;
-		*/
-    cout << "Max index :" << maxIndex << " Max score : " << mx << endl;
-    /*
-	uint8_t minMax;
-	uint8_t minMaxIndex;
-	uint8_t curMax = 0;
-	uint8_t curMaxIndex;
-	vector<int, int> bestMatches;
-	bestMatches.resize(50);
-	for (int i = 0; i < 50; i++)
-	{
-		for (int j = 0; j < nb_seq; j++)
-		{
-			if (scores.at(j) > curMax && (scores.at(j) < minMax || (scores.at(j) = minMax && j > minMaxIndex)))
-			{
-				curMax = scores.at(j);
-				curMaxIndex = j;
-			}
-		}
-		minMax = curMax;
-		minMaxIndex = curMaxIndex;
-		bestMatches.at(i) = ((int)curMax, (int)curMaxIndex);
-		string header;
-		find_header(header, (int)curMaxIndex);
-		printf("%s, score %i\n", header, (int)curMax);
 	}
-	// ===> On créer une liste avec les scores de protéines et et leur index dans les offset*/
+    cout << "Max index :" << maxIndex << " Max score : " << mx << endl;
 }
 
 uint8_t *Database::convertToValue(ifstream &queryFlux, int &nb)

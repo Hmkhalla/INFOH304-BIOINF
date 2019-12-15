@@ -24,7 +24,7 @@ class Database
     char *time;
     uint32_t *Index_seq_table;
     uint32_t *Index_head_table;
-    int16_t Max(int16_t n1, int16_t n2, int16_t n3, int16_t n4);
+    int Max(int n1, int n2, int n3, int n4);
     void getBlosumMatrix(string blosumPath);
 
 public:
