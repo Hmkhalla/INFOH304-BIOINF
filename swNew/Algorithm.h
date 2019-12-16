@@ -8,7 +8,12 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <pthread.h>
 using namespace std;
+
+struct thread_data {
+   int  thread_id;
+};
 
 class Algorithm 
 {
@@ -16,8 +21,11 @@ class Algorithm
 	int Q;
 	int R;
 	uint nb_seq;
+	uint8_t nb_thread;
     int8_t blosumMatrix[28][28];
     Sequence query;
+    pthread_t* threads;
+    Sequence *seqArray;
     map<char, uint8_t> conversion;
     
     int Max(int n1, int n2, int n3) const;
@@ -26,9 +34,10 @@ class Algorithm
 
 
 public:
-    Algorithm(string dbPath, string fasta, string pathBlosum, int extension_gap = 1, int open_gap = 11);
+    Algorithm(string dbPath, string fasta, string pathBlosum, int core, int extension_gap = 1, int open_gap = 11);
     ~Algorithm();
+    void startMultithread();
     void exactMatch();
-    void swAlgo();
+    void* swAlgo(void* start);
 };
 #endif

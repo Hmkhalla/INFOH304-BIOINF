@@ -17,9 +17,10 @@ int main(int argc, char *argv[])
 {
 	int core = getNumCores();
 	cout << "Number of cores : "<<core<<endl;
-	Algorithm *al = new Algorithm(argv[1],argv[2],argv[3]);
+	Algorithm *al = new Algorithm(argv[1],argv[2],argv[3], core);
 	//al->exactMatch();
-	al->swAlgo();
+	//al->swAlgo();
+	//al->startMultithread();
 
 	delete al;
 	return 0;

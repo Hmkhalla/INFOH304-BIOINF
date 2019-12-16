@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Algorithm::Algorithm(string dbPath, string fasta, string pathBlosum, int extension_gap, int open_gap)
+Algorithm::Algorithm(string dbPath, string fasta, string pathBlosum, int core, int extension_gap, int open_gap)
 {
 	conversion = {
         {'-', 0}, {'A', 1}, {'B', 2}, {'C', 3}, {'D', 4}, {'E', 5}, {'F', 6}, {'G', 7}, {'H', 8}, {'I', 9}, {'J', 27}, {'K', 10}, {'L', 11}, {'M', 12}, {'N', 13}, {'O', 26}, {'P', 14}, {'Q', 15}, {'R', 16}, {'S', 17}, {'T', 18}, {'U', 24}, {'V', 19}, {'W', 20}, {'X', 21}, {'Y', 22}, {'Z', 23}, {'*', 25} //etc
@@ -13,12 +13,17 @@ Algorithm::Algorithm(string dbPath, string fasta, string pathBlosum, int extensi
 	nb_seq = db->getNbSeq();
 	query = Sequence(fasta);
 	initBlosumMatrix(pathBlosum);
+	nb_thread= core; 
+	threads = new pthread_t[nb_thread];
+	Sequence *seqArray = new Sequence[nb_seq];
 	db->printDbDescription();
 }
 
 Algorithm::~Algorithm()
 {
 	delete db;
+	delete []threads;
+	delete []seqArray; 
 }
 	
 int Algorithm::Max(int n1, int n2, int n3) const{
@@ -101,20 +106,39 @@ int Algorithm::scoring(Sequence& tmp) const
     return max_scoring;
 }
 
-void Algorithm::swAlgo()
+void Algorithm::startMultithread(){
+	int res;
+	thread_data td[nb_thread];
+	for(int i = 0; i<nb_thread; i++){
+		td[i].thread_id=i;
+		res = pthread_create (&threads[i], NULL, swAlgo, (void *)&td[i]);
+	    if (res != 0)
+	    {
+	        //cerr (stderr, "Création du thread: %s\n", strerror (res));
+	        cout << "error creation thread" << endl;
+	        exit (EXIT_FAILURE);
+	    }
+	}
+	for (int i = 0; i<nb_thread; i++) pthread_join (threads[i], NULL);
+	std::sort(seqArray, seqArray+nb_seq, [](Sequence &a, Sequence &b) {
+			return a.score > b.score;
+		});
+    
+    for (int i = 0; i<10;i++){
+		cout << "Index : "<<seqArray[i].index<< " Score : " << (int) seqArray[i].score <<endl;
+	}
+}
+void * Algorithm::swAlgo(void * data)
 {
     Sequence temp_seq;
-    Sequence *scores = new Sequence[nb_seq];
-    //vector<Sequence> scores;
+    int start = (thread_data *) data->thread_id;
+    /*if (data==NULL) start=0;
+    else start= *data; */
     int score;
     int tmp_len;
-    
-    //scores.resize(nb_seq);
-    int mx = 0;
-    int maxIndex = 0;
     int a;
     uint8_t* point;
-    for (int i = 0; i < nb_seq; i++)
+    for (int i = start; i < nb_seq; i+=nb_thread)
     {
         if (i % 1000 == 18)
         {
@@ -124,35 +148,9 @@ void Algorithm::swAlgo()
         temp_seq = Sequence(point, a, i);
         score = scoring(temp_seq);
         temp_seq.setScore(score);
-        if (score > mx)// && i != 2958)
-        {
-            mx = score;
-            maxIndex = i;
-        }
-        //scores.push_back(temp_seq);
-        scores[i]=temp_seq; //min: 32 2968
+        seqArray[i]=temp_seq; //min: 32 2968
     }
-    /*
-    sort(scores.begin(), scores.end(), [](Sequence &a, Sequence &b) {
-			return a.score > b.score;
-		});
-    int j = 0;
-    for (const auto &i: scores){
-		if (j == 10) break;
-		//cout << "Score : " << (int) i <<endl;
-		cout << "Index : "<<i.index<< " Score : " << (int) i.score <<endl;
-		j++;
-	}*/
-    
-    std::sort(scores, scores+nb_seq, [](Sequence &a, Sequence &b) {
-			return a.score > b.score;
-		});
-    
-    for (int i = 0; i<10;i++){
-		cout << "Index : "<<scores[i].index<< " Score : " << (int) scores[i].score <<endl;
-	}
-    cout << "Max index :" << maxIndex << " Max score : " << mx << endl;
-    delete [] scores;
+    pthread_exit (NULL);
 }
 
 void Algorithm::exactMatch()
