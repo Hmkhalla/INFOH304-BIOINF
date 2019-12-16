@@ -14,8 +14,8 @@ Algorithm::Algorithm(string dbPath, string fasta, string pathBlosum, int core, i
 	query = Sequence(fasta);
 	initBlosumMatrix(pathBlosum);
 	nb_thread= core; 
-	threads = new pthread_t[nb_thread];
-	Sequence *seqArray = new Sequence[nb_seq];
+	threads = new thread[nb_thread];
+	seqArray = new Sequence[nb_seq];
 	db->printDbDescription();
 }
 
@@ -108,18 +108,10 @@ int Algorithm::scoring(Sequence& tmp) const
 
 void Algorithm::startMultithread(){
 	int res;
-	thread_data td[nb_thread];
 	for(int i = 0; i<nb_thread; i++){
-		td[i].thread_id=i;
-		res = pthread_create (&threads[i], NULL, swAlgo, (void *)&td[i]);
-	    if (res != 0)
-	    {
-	        //cerr (stderr, "Création du thread: %s\n", strerror (res));
-	        cout << "error creation thread" << endl;
-	        exit (EXIT_FAILURE);
-	    }
+	    threads[i]=std::thread(&Algorithm::swAlgo, ref(*this), i); 
 	}
-	for (int i = 0; i<nb_thread; i++) pthread_join (threads[i], NULL);
+	for (int i = 0; i<nb_thread; i++) threads[i].join();
 	std::sort(seqArray, seqArray+nb_seq, [](Sequence &a, Sequence &b) {
 			return a.score > b.score;
 		});
@@ -128,12 +120,9 @@ void Algorithm::startMultithread(){
 		cout << "Index : "<<seqArray[i].index<< " Score : " << (int) seqArray[i].score <<endl;
 	}
 }
-void * Algorithm::swAlgo(void * data)
+void Algorithm::swAlgo(int start)
 {
     Sequence temp_seq;
-    int start = (thread_data *) data->thread_id;
-    /*if (data==NULL) start=0;
-    else start= *data; */
     int score;
     int tmp_len;
     int a;
@@ -150,7 +139,6 @@ void * Algorithm::swAlgo(void * data)
         temp_seq.setScore(score);
         seqArray[i]=temp_seq; //min: 32 2968
     }
-    pthread_exit (NULL);
 }
 
 void Algorithm::exactMatch()

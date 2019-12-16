@@ -1,4 +1,5 @@
 #include "Algorithm.h"
+//#include <pthread.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -20,7 +21,8 @@ int main(int argc, char *argv[])
 	Algorithm *al = new Algorithm(argv[1],argv[2],argv[3], core);
 	//al->exactMatch();
 	//al->swAlgo();
-	//al->startMultithread();
+	cout << "1"<< endl;
+	al->startMultithread();
 
 	delete al;
 	return 0;

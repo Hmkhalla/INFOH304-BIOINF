@@ -8,12 +8,14 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <pthread.h>
+//#include <pthread.h>
+#include <thread>
 using namespace std;
 
+/*
 struct thread_data {
    int  thread_id;
-};
+};*/
 
 class Algorithm 
 {
@@ -24,7 +26,7 @@ class Algorithm
 	uint8_t nb_thread;
     int8_t blosumMatrix[28][28];
     Sequence query;
-    pthread_t* threads;
+    thread* threads;
     Sequence *seqArray;
     map<char, uint8_t> conversion;
     
@@ -38,6 +40,6 @@ public:
     ~Algorithm();
     void startMultithread();
     void exactMatch();
-    void* swAlgo(void* start);
+    void swAlgo(int start);
 };
 #endif
