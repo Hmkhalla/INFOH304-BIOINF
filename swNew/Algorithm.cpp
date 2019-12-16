@@ -23,7 +23,8 @@ Algorithm::~Algorithm()
 {
 	delete db;
 	delete []threads;
-	delete []seqArray; 
+	delete []seqArray;
+	query.free_sequence();
 }
 	
 int Algorithm::Max(int n1, int n2, int n3) const{

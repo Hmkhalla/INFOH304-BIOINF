@@ -97,7 +97,7 @@ void Database::readPin(string & path)
         stream << "Longest db seq: " << max_seq << endl;
 		description = stream.str();
         pin.close();
-        
+        delete time; delete title;
     }
     else{
 		cerr << "Impossible d'ouvrir le fichier pin" << endl;
