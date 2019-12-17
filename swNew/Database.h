@@ -32,8 +32,9 @@ public:
     ~Database();
     void printDbDescription() const;
     
-    uint8_t *find_seq(int index, int &nb) const;
-    void find_header(string &res, int index) const;
+    uint8_t *getSeq(int index, int &nb) const;
+    uint8_t *getHeader(int index, int &nb) const;
+    void find_header(string &res, int index) ;
     
     uint32_t getNbSeq() const;
     uint32_t getLenSeq(int index) const;

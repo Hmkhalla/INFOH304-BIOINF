@@ -27,7 +27,6 @@ struct Sequence
 	Sequence(uint8_t *sequence, int len, int index);
 	~Sequence();
 	const Sequence & operator= ( const Sequence & SequenceOriginal);
-	uint8_t operator[] (unsigned int i) const;
 	bool operator== (const Sequence &right) const;
 	void free_sequence();
 	const string getName() const;

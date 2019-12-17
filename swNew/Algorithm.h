@@ -41,5 +41,6 @@ public:
     void startMultithread();
     void exactMatch();
     void swAlgo(int start);
+    void showResult();
 };
 #endif

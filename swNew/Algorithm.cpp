@@ -108,19 +108,23 @@ int Algorithm::scoring(Sequence& tmp) const
 }
 
 void Algorithm::startMultithread(){
-	int res;
 	for(int i = 0; i<nb_thread; i++){
 	    threads[i]=std::thread(&Algorithm::swAlgo, ref(*this), i); 
 	}
 	for (int i = 0; i<nb_thread; i++) threads[i].join();
+}
+
+void Algorithm::showResult(){
 	std::sort(seqArray, seqArray+nb_seq, [](Sequence &a, Sequence &b) {
 			return a.score > b.score;
 		});
-    
     for (int i = 0; i<10;i++){
-		cout << "Index : "<<seqArray[i].index<< " Score : " << (int) seqArray[i].score <<endl;
+		string header;
+		db->find_header(header, seqArray[i].index);
+		cout << "Score : " << (int) seqArray[i].score <<endl << header<< endl <<endl;
 	}
 }
+
 void Algorithm::swAlgo(int start)
 {
     Sequence temp_seq;
@@ -130,11 +134,11 @@ void Algorithm::swAlgo(int start)
     uint8_t* point;
     for (int i = start; i < nb_seq; i+=nb_thread)
     {
-        if (i % 1000 == 18)
+        /*if (i % 1000 == 18)
         {
             printf("On est à %d/%d \n", i, nb_seq);
-        }
-        point=db->find_seq(i, a);
+        }*/
+        point=db->getSeq(i, a);
         temp_seq = Sequence(point, a, i);
         score = scoring(temp_seq);
         temp_seq.setScore(score);
@@ -150,7 +154,7 @@ void Algorithm::exactMatch()
     {
         if (db->getLenSeq(i) == query.getLen())
         {
-			uint8_t* seq = db->find_seq(i, tmp_len);
+			uint8_t* seq = db->getSeq(i, tmp_len);
 			temp_seq= Sequence(seq, tmp_len, i);
 			cout <<"admissible "<<endl;
             if (query == temp_seq)

@@ -16,13 +16,50 @@ int getNumCores();
 
 int main(int argc, char *argv[])
 {
+	if (argc < 3){
+		cout <<"Error invalid argument"<<endl<<"projet database query.fasta [-o IntOpenPenality] [-e IntExtensionPenality] [-b BLOSUM]" << endl << "Default value : IntOpenPenality=11 IntExtensionPenality=1 BLOSUM=BLOSUM62" << endl;
+		return EXIT_FAILURE;}
+	string pathBlosum="BLOSUM62";
+	int extension_gap=1, open_gap=11;
 	int core = getNumCores();
+	for(int i = 1; i < argc; ++i){
+		string current_arg = (string) argv[i];
+		if(current_arg == "-o") {
+			// Optional gap open penalty is set
+			//current_arg = (string) argv[i+1];
+			if(argv[i+1] == NULL ){//|| !any_of(current_arg.begin(), current_arg.end(), ::isdigit)) {
+				cout << "Invalid gap open penalty argument." << endl;
+				exit(EXIT_FAILURE);
+			} else {
+				open_gap = atoi(argv[i+1]);
+				continue; // we can skip next argument as it is the gap open penalty value
+			} 
+		} else if(current_arg == "-e") {
+			// Optional gap expansion penalty is set
+			current_arg = (string) argv[i+1];
+			if(argv[i+1] == NULL){// || !any_of(current_arg.begin(), current_arg.end(), ::isdigit)) {
+				cout << "Invalid gap expansion penalty argument." << endl;
+				exit(EXIT_FAILURE);
+			} else {
+				extension_gap = atoi(argv[i+1]);
+				continue; // we can skip next argument as it is the gap expansion penalty value
+			}
+		} else if(current_arg == "-b") {
+			// Optional BLOSUM matrix is set
+			pathBlosum = (string) argv[i+1];
+			if(argv[i+1] == NULL){
+				cout << "Invalid blosum argument." << endl;
+				exit(EXIT_FAILURE);}
+			continue;
+		}
+	}
+	
 	cout << "Number of cores : "<<core<<endl;
-	Algorithm *al = new Algorithm(argv[1],argv[2],argv[3], core);
+	Algorithm *al = new Algorithm(argv[1],argv[2],pathBlosum, core, extension_gap, open_gap);
 	//al->exactMatch();
 	//al->swAlgo();
-	cout << "1"<< endl;
 	al->startMultithread();
+	al->showResult();
 
 	delete al;
 	return 0;

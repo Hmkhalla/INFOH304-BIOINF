@@ -30,10 +30,6 @@ const Sequence & Sequence::operator= ( const Sequence & SequenceOriginal){
 	}
 }
 
-uint8_t Sequence::operator[] (unsigned int i) const{
-	return *(sequence+i);
-}
-
 bool Sequence::operator== (const Sequence &right) const{
 	int i;
 	//cout << "left| len : "<< len <<" index : "<<right.index<< " right| len :" << right.len <<endl;
@@ -71,13 +67,12 @@ void Sequence::convertToValue(string &fasta)
         {
             if (residue != 10 && residue != 13)
             {
-				
                 buffer += residue;
             }
         }
         len = buffer.length();
         sequence = new uint8_t[len];
-        for (int i = 0; i < buffer.length(); i++)
+        for (int i = 0; i < len; i++)
         {
             sequence[i] = conversion[buffer[i]];
         }

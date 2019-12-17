@@ -156,93 +156,68 @@ uint32_t Database::getLenSeq(int index) const{
 	return getIndexSeq(index + 1) - getIndexSeq(index) - 1;
 }
 
-uint8_t *Database::find_seq(int index, int &len) const
+uint8_t *Database::getSeq(int index, int &len) const
 {
 	len = ((int)getIndexSeq(index + 1) - (int)getIndexSeq(index)) - 1;
 	return psq + getIndexSeq(index);
 }
 
-void Database::find_header(string &res, int index) const
+uint8_t *Database::getHeader(int index, int &len) const
 {
-	string title = "";
-	string type = "";
-	string db = "";
-	string id = "";
-	int start, end;
-	start = getIndexHead(index);
-	end = getIndexHead(index + 1);
-	bool readingInt = false;
-	bool readingLen = false;
-	bool readingStr = false;
-	uint8_t byte;
-	for (int i = 0; i < end; i++){
-		byte = phr[start+i];
-		if (!readingInt && !readingLen && !readingStr)
-		{
-			switch (byte)
-			{
-			case 0x1a:
-				// String
-				readingStr = true;
-				readingLen = true;
-				break;
-			case 0x02:
-				// int
-				readingInt = true;
-				readingLen = true;
-				break;
+	len = ((int)getIndexHead(index + 1) - (int)getIndexHead(index)) - 1;
+	return phr + getIndexHead(index);
+}
+	
+
+void Database::find_header(string &description, int index){
+	int headerSize;
+	uint8_t * header = getHeader(index, headerSize);
+	string title, db, type, id;
+
+	int intDone = 0;
+	int strDone = 0;
+	int len = 0; //length of int or str (in bytes)
+	stringstream strBuffer[2];
+	stringstream intBuffer[2];
+	
+	for (int i = 0; i<headerSize; i++){ //reading every bytes of the header
+		if(header[i] == 0x1a){//READING STRING
+			//reading length 
+			i++;
+			if(header[i] & (1 << 7)){ //MSB ON
+				int a = (header[i] & ~(1 << 7)) | ((0 << 7) & (1 << 7)); //length of the string is stored in "numberOfBytesString" bytes
+				for (int j = 0; j < a; j++){ 
+					i++;
+					len = len << 8 | (int) header[i];
+				}
 			}
+			else{
+				//MSB OFF
+				len = (int) header[i]; //length of the string is stored int 1 byte
+			}
+			
+			//reading string
+			for (int j = 0; j < len; j++){
+				i++;
+				strBuffer[strDone] << (char) header[i];
+			}
+			strDone++;
+			
 		}
-		else if (readingLen)
-		{
-			unsigned long len = 0;
-			if (readingStr)
-			{
-				if (byte & (1 << 7))
-				{
-					byte = (byte & ~(1 << 7)) | ((0 << 7) & (1 << 7));
-					for (int j = 0; j < byte; j++)
-					{
-						//phr.read((char *)&buffer, sizeof(uint8_t));
-						len = len << 8 | (unsigned long)phr[start+i+j];
-					}
-					i+=byte;
-					//phr.read((char *)&(len), sizeof(byte) * (int)byte);
-				}
-				else
-					len = (int)byte;
-				char buffer[len + 1];
-				for (int j = 0; j<len; j++){
-					buffer[j]=phr[start+i+j];
-					//phr.read((char *)&(buffer[0]), sizeof(byte) * len);
-				}
-				i+=len;
-				buffer[len] = 0;
-				readingStr = false;
-				if (title.empty())
-					title = buffer;
-				else
-					db = buffer;
+		else if(header[i] == 0x02){// READING INT
+			//reading length
+			i++;
+			len = (int) header[i];
+ 			int intFound= 0;
+			//reading int
+			for (int j = 0; j < len; j++){ 
+				i++;
+				intFound = intFound << 8 | (int)header[i];
 			}
-			else if (readingInt)
-			{
-				len = (int)byte;
-				unsigned long intFound = 0;
-				//uint8_t buffer = 0;
-				for (int j = 0; j < len; j++)
-				{
-					//phr.read((char *)&buffer, sizeof(uint8_t));
-					intFound = intFound << 8 | (unsigned long)phr[start+i+j];
-				}
-				i+=len;
-				readingInt = false;
-				if (id.empty())
-					id = to_string((int)intFound);
-				else
-					type = to_string((int)intFound);
-			}
-			readingLen = false;
+		    intBuffer[intDone] << intFound;
+			
+			intDone++;
 		}
 	}
-	res = type + "|" + db + "|" + id + " " + title;
+	description = intBuffer[1].str()+"|"+strBuffer[1].str()+"|"+intBuffer[0].str()+" "+strBuffer[0].str();	
 }
