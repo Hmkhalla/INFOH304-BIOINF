@@ -23,6 +23,7 @@ class Database
     
     uint32_t getIndexSeq(int index) const;
     uint32_t getIndexHead(int index) const;
+    
     void readPin(string & path);
     void loadPhr(string & path);
     void loadPsq(string & path);
@@ -30,7 +31,6 @@ class Database
 public:
     Database(string &dbPath);
     ~Database();
-    void printDbDescription() const;
     
     uint8_t *getSeq(int index, int &nb) const;
     uint8_t *getHeader(int index, int &nb) const;

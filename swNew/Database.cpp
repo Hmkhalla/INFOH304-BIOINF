@@ -17,7 +17,7 @@ Database::~Database()
     delete[] Index_head_table;
 }
 
-void Database::loadPhr(string &path)
+void Database::loadPhr(string &path)    //Loading of the Header file into memory 
 {
 	ifstream phr_stream = ifstream(path + ".phr", ios::binary);
 	if (phr_stream.is_open())
@@ -26,12 +26,12 @@ void Database::loadPhr(string &path)
 		phr_stream.read((char *)&phr[0], sizeof(uint8_t) * (Index_head_table[nb_seq]));
 		phr_stream.close();
 	}else{
-		cerr << "Impossible d'ouvrir le fichier phr" << endl;
+		cerr << "Impossible to open the file phr" << endl;
 		exit(EXIT_FAILURE);
 	}
 }
 
-void Database::loadPsq(string &path)
+void Database::loadPsq(string &path)   //Loading of the Sequence file into memory
 {
 	ifstream psq_stream = ifstream(path + ".psq", ios::binary);
 	if (psq_stream.is_open())
@@ -40,13 +40,13 @@ void Database::loadPsq(string &path)
 		psq_stream.read((char *)&psq[0], sizeof(uint8_t) * (Index_seq_table[nb_seq]));
 		psq_stream.close();
 	}else{
-		cerr << "Impossible d'ouvrir le fichier psq" << endl;
+		cerr << "Impossible to open the file psq" << endl;
 		exit(EXIT_FAILURE);
 	}
 }
 
 
-void Database::readPin(string & path)
+void Database::readPin(string & path) //Parsing of the Index file and storing the database description
 {
 	ifstream pin = ifstream(path + ".pin", ios::binary);
 	if (pin.is_open())
@@ -101,14 +101,9 @@ void Database::readPin(string & path)
         delete time; delete title;
     }
     else{
-		cerr << "Impossible d'ouvrir le fichier pin" << endl;
+		cerr << "Impossible to open the file pin" << endl;
 		exit(EXIT_FAILURE);
    }
-}
-
-void Database::printDbDescription() const
-{
-    
 }
 
 uint32_t Database::getIndexSeq(int index) const

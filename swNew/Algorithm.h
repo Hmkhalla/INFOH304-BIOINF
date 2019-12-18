@@ -14,10 +14,6 @@
 #define BLOSUM_SIZE 24
 using namespace std;
 
-/*
-struct thread_data {
-   int  thread_id;
-};*/
 
 class Algorithm 
 {

@@ -26,7 +26,7 @@ Algorithm::~Algorithm()
 	query.free_sequence();
 }
 	
-int Algorithm::Max(int n1, int n2, int n3) const{
+int Algorithm::Max(int n1, int n2, int n3) const{ 
 	int res = 0;
 	if(res < n1) res = n1;
 	if(res < n2) res = n2;
@@ -34,7 +34,7 @@ int Algorithm::Max(int n1, int n2, int n3) const{
 	return res;
 }
 
-void Algorithm::initBlosumMatrix(string &pathBlosum)
+void Algorithm::initBlosumMatrix(string &pathBlosum) //parse any type of blosum matrix and store it in a 2D array
 
 {
     ifstream blosumFile;
@@ -59,7 +59,6 @@ void Algorithm::initBlosumMatrix(string &pathBlosum)
         {
             if(!isdigit(sub[sub.size()-1])) { continue; }
             int8_t digit = strtol(sub.c_str(), NULL, 10);
-				//cout << "digit found " << digit << endl;
                 if(j > 24) // we are at end of line
                 {
                     i++; // go to next line
@@ -67,16 +66,11 @@ void Algorithm::initBlosumMatrix(string &pathBlosum)
                 }
                 blosumMatrix[conversionCharChar[i]][conversionCharChar[j++]] = digit;
         }
-    }/*
-    for(int i = 0; i < 28; i++){
-		for(int j = 0; j < 28; j++){
-			cout << "(" << i << ", " << j << ") " << (int)blosumMatrix[i][j] << endl;
-		}
-	}*/
+    }
     blosumFile.close();
 }
 
-int Algorithm::scoring(Sequence& tmp) const
+int Algorithm::scoring(Sequence& tmp) const //implemantion of the algorithm
 {
     int blos;
     int F = 0;
@@ -99,8 +93,6 @@ int Algorithm::scoring(Sequence& tmp) const
 			blos = blosumMatrix[query.sequence[i-1]][tmp.sequence[j-1]];
 			H = Max(H_left[i-1]+blos, E_left[i], F);
 			H_left[i-1] = H_top; H_top = H;
-			//if (i == j)
-			//cout << "(" << i-1 << ", " << j-1 << ") " << "(" << (int )query[i-1] << ", " << (int )tmp[j-1] << ") " << " E : " << E_left[i] << " F : " << F << " Hcurrent : " << H << " Blosum : " << (int) blos <<endl;
 			if (H > max_scoring) max_scoring = H;
         }
         F=0;H_top=0;H_left[queryLen] = H;
@@ -117,7 +109,7 @@ void Algorithm::startMultithread(){
 	for (int i = 0; i<nb_thread; i++) threads[i].join();
 }
 
-void Algorithm::showResult(){
+void Algorithm::showResult(){    //prints, by order, the score and header of the 10 proteins with the best scores 
 	std::sort(seqArray, seqArray+nb_seq, [](Sequence &a, Sequence &b) {
 			return a.score > b.score;
 		});
@@ -128,7 +120,7 @@ void Algorithm::showResult(){
 	}
 }
 
-void Algorithm::swAlgo(int start)
+void Algorithm::swAlgo(int start) //executes the algorithm's implementation for each sequence of the database and store it in an array
 {
     Sequence temp_seq;
     int score;
@@ -137,19 +129,15 @@ void Algorithm::swAlgo(int start)
     uint8_t* point;
     for (int i = start; i < nb_seq; i+=nb_thread)
     {
-        /*if (i % 1000 == 18)
-        {
-            printf("On est à %d/%d \n", i, nb_seq);
-        }*/
         point=db->getSeq(i, a);
         temp_seq = Sequence(point, a, i);
         score = scoring(temp_seq);
         temp_seq.setScore(score);
-        seqArray[i]=temp_seq; //min: 32 2968
+        seqArray[i]=temp_seq; 
     }
 }
 
-void Algorithm::exactMatch()
+void Algorithm::exactMatch() //checks for each template sequence if its length equals to the query's one and then compares the ones with same length
 {
     Sequence temp_seq;
     int tmp_len=0;

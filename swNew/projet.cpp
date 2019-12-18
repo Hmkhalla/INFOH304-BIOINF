@@ -1,6 +1,6 @@
 #include "Algorithm.h"
 #include <time.h>
-//#include <pthread.h>
+
 
 #ifdef _WIN32
 #include <windows.h>
@@ -36,9 +36,8 @@ int main(int argc, char *argv[])
 		if (current_arg == "-o")
 		{
 			// Optional gap open penalty is set
-			//current_arg = (string) argv[i+1];
 			if (argv[i + 1] == NULL)
-			{ //|| !any_of(current_arg.begin(), current_arg.end(), ::isdigit)) {
+			{ 
 				cout << "Invalid gap open penalty argument." << endl;
 				exit(EXIT_FAILURE);
 			}
@@ -53,7 +52,7 @@ int main(int argc, char *argv[])
 			// Optional gap expansion penalty is set
 			current_arg = (string)argv[i + 1];
 			if (argv[i + 1] == NULL)
-			{ // || !any_of(current_arg.begin(), current_arg.end(), ::isdigit)) {
+			{ 
 				cout << "Invalid gap expansion penalty argument." << endl;
 				exit(EXIT_FAILURE);
 			}
@@ -79,7 +78,6 @@ int main(int argc, char *argv[])
 	cout << "Number of CPU : " << core << endl;
 	Algorithm *al = new Algorithm(argv[1], argv[2], pathBlosum, core, extension_gap, open_gap);
 	//al->exactMatch();
-	//al->swAlgo();
 	al->startMultithread();
 	al->showResult();
 
@@ -120,3 +118,4 @@ int getNumCores()
 	return sysconf(_SC_NPROCESSORS_ONLN);
 #endif
 }
+

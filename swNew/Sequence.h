@@ -21,7 +21,7 @@ struct Sequence
 	
 	void convertToValue(string &fasta);
 
-//public:
+
 	Sequence();
 	Sequence(string &fasta);
 	Sequence(uint8_t *sequence, int len, int index);
