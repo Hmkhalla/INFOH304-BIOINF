@@ -8,8 +8,10 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-//#include <pthread.h>
+#include <boost/algorithm/string.hpp>
 #include <thread>
+
+#define BLOSUM_SIZE 24
 using namespace std;
 
 /*
@@ -24,7 +26,7 @@ class Algorithm
 	int R;
 	uint nb_seq;
 	uint8_t nb_thread;
-    int8_t blosumMatrix[28][28];
+    int8_t blosumMatrix[28][28] ={0};
     Sequence query;
     thread* threads;
     Sequence *seqArray;

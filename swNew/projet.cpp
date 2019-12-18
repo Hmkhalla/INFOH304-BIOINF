@@ -18,7 +18,8 @@ int main(int argc, char *argv[])
 {
 	if (argc < 3){
 		cout <<"Error invalid argument"<<endl<<"projet database query.fasta [-o IntOpenPenality] [-e IntExtensionPenality] [-b BLOSUM]" << endl << "Default value : IntOpenPenality=11 IntExtensionPenality=1 BLOSUM=BLOSUM62" << endl;
-		return EXIT_FAILURE;}
+		return EXIT_FAILURE;
+	}
 	string pathBlosum="BLOSUM62";
 	int extension_gap=1, open_gap=11;
 	int core = getNumCores();
@@ -54,7 +55,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	cout << "Number of cores : "<<core<<endl;
+	cout << "Number of CPU : "<<core<<endl;
 	Algorithm *al = new Algorithm(argv[1],argv[2],pathBlosum, core, extension_gap, open_gap);
 	//al->exactMatch();
 	//al->swAlgo();

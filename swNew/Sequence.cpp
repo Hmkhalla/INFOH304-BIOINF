@@ -9,8 +9,8 @@ Sequence::Sequence(){
 }
 
 Sequence::Sequence(string &fasta){
-	//ifstream queryFlux(fasta, ios::binary);
 	convertToValue(fasta);
+	cout << "Query file name: " << fasta << endl << "Query length: " << len << " residues" << endl << "Query description: " << name << endl << endl;
 }
 
 Sequence::Sequence(uint8_t *table, int ln, int i){
@@ -61,8 +61,7 @@ void Sequence::convertToValue(string &fasta)
 	ifstream queryFlux(fasta, ios::binary);
     if (queryFlux.is_open())
     {
-        string header;
-        getline(queryFlux, header);
+        getline(queryFlux, name);
         while (queryFlux.get(residue))
         {
             if (residue != 10 && residue != 13)

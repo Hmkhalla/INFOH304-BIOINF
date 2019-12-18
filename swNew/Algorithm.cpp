@@ -16,7 +16,6 @@ Algorithm::Algorithm(string dbPath, string fasta, string pathBlosum, int core, i
 	nb_thread= core; 
 	threads = new thread[nb_thread];
 	seqArray = new Sequence[nb_seq];
-	db->printDbDescription();
 }
 
 Algorithm::~Algorithm()
@@ -36,40 +35,44 @@ int Algorithm::Max(int n1, int n2, int n3) const{
 }
 
 void Algorithm::initBlosumMatrix(string &pathBlosum)
+
 {
     ifstream blosumFile;
     blosumFile.open(pathBlosum);
     if (!blosumFile)
     {
-        cout << "Unable to open file" << endl;
+        cout << "Unable to open BLOSUM file" << endl;
         exit(1);
     }
-    for (int i = 0; i<28; i++) {
-		for (int j = 0; j<28; j++) {
-			blosumMatrix[i][j] = 0; 
-		}
-	}
-    string line;
-    map<int, uint8_t> conversionChar;
-    while (getline(blosumFile, line))
-    {
-        if (line.at(0) == '#')
-            continue;
-        if (line.at(0) == ' ')
-        {
-            for (int i = 3; i < 73; i += 3)
-            {
-                conversionChar.insert({(int)i / 3, conversion[line.at(i)]});
-            }
-            continue;
-        }
-        for (int i = 3; i < 73; i += 3)
-        {
-			if (line.at(i - 1)== ' ' or line.at(i - 1) == '-') blosumMatrix[conversionChar[(int)i / 3]][conversion[line.at(0)]] = ((int)line.at(i) - 48) * ((line.at(i - 1) == '-') ? -1 : 1);
-			else blosumMatrix[conversionChar[(int)i / 3]][conversion[line.at(0)]] = 11;
-
-        }
+    std::string s;
+    std::vector<std::string> line_vector;
+    map<int, int8_t> conversionCharChar;
+    for(int i = 0; i < 7; i++) {std::getline(blosumFile,s);} // ignore first 6 lines and use 7th to build conversion map
+    for (int i = 3; i < 73; i += 3){
+		conversionCharChar.insert({((int)i / 3), ((int)conversion[s.at(i)])}); //column to blast
     }
+    int i = 1; int j = 1;
+    while(getline(blosumFile,s))
+    {
+        boost::split(line_vector, s, boost::is_any_of(" "));
+        for(std::string sub: line_vector)
+        {
+            if(!isdigit(sub[sub.size()-1])) { continue; }
+            int8_t digit = strtol(sub.c_str(), NULL, 10);
+				//cout << "digit found " << digit << endl;
+                if(j > 24) // we are at end of line
+                {
+                    i++; // go to next line
+                    j = 1; // reset column counter
+                }
+                blosumMatrix[conversionCharChar[i]][conversionCharChar[j++]] = digit;
+        }
+    }/*
+    for(int i = 0; i < 28; i++){
+		for(int j = 0; j < 28; j++){
+			cout << "(" << i << ", " << j << ") " << (int)blosumMatrix[i][j] << endl;
+		}
+	}*/
     blosumFile.close();
 }
 
@@ -118,7 +121,7 @@ void Algorithm::showResult(){
 	std::sort(seqArray, seqArray+nb_seq, [](Sequence &a, Sequence &b) {
 			return a.score > b.score;
 		});
-    for (int i = 0; i<10;i++){
+    for (int i = 0; i<10 && i < nb_seq;i++){
 		string header;
 		db->find_header(header, seqArray[i].index);
 		cout << "Score : " << (int) seqArray[i].score <<endl << header<< endl <<endl;

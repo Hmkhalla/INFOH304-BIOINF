@@ -6,6 +6,7 @@ Database::Database(string &path)
     readPin(path);
     loadPsq(path);
     loadPhr(path);
+    cout << description<<endl; 
 }
 
 Database::~Database()
@@ -106,25 +107,8 @@ void Database::readPin(string & path)
 }
 
 void Database::printDbDescription() const
-{/*
-    cout << "Version :" << version << endl;
-    cout << "db_type :" << db_type << endl;
-    cout << "title :" << title << endl;
-    cout << "Timestamp :" << time << endl;
-    cout << "Number of sequences :" << nb_seq << endl;
-    cout << "Residue count :" << res_count << endl;
-    cout << "Maximum sequence :" << max_seq << endl;
-    for (int i = 0; i < 5; i++)
-    {
-        cout << "Header offset table " << i << " : " << Index_head_table[i] << endl;
-    }
-    cout << "Header offset table " << nb_seq << " : " << Index_head_table[nb_seq] << endl;
-    cout << "Sequence offset table " << nb_seq << " : " << Index_seq_table[nb_seq] << endl;
-    for (int i = 0; i < 5; i++)
-    {
-        cout << "Sequence offset table " << i << " : " << Index_seq_table[i] << endl;
-    }*/
-    cout << description; 
+{
+    
 }
 
 uint32_t Database::getIndexSeq(int index) const
