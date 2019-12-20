@@ -1,6 +1,5 @@
 #include "Algorithm.h"
-#include <time.h>
-
+#include <chrono>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -17,6 +16,7 @@ int getNumCores();
 
 int main(int argc, char *argv[])
 {
+	auto start = std::chrono::high_resolution_clock::now();
 	if (argc < 3)
 	{
 		cout << "Error invalid argument" << endl
@@ -80,11 +80,11 @@ int main(int argc, char *argv[])
 	//al->exactMatch();
 	al->startMultithread();
 	al->showResult();
-
-	clock_t difference = clock() - before;
-	int msec = difference * 1000 / CLOCKS_PER_SEC;
-	printf("Time taken : %d seconds %d milliseconds \n", msec / 1000, msec % 1000);
-
+	
+	auto end = std::chrono::high_resolution_clock::now();
+    auto sec_duration = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+    auto ms_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    std::cout << "\nTime taken : " << sec_duration << "." << ms_duration % 1000  << "s" << std::endl;
 	delete al;
 	return 0;
 }
